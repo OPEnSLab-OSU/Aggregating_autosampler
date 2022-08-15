@@ -6,18 +6,19 @@ namespace HardwarePins {
 	constexpr int SHFT_REG_DATA	 = 12;
 	constexpr int MOTOR_REVERSE	 = 5;
 	constexpr int MOTOR_FORWARDS = 6;
-	constexpr int RUN_BUTTON	 = 13;
-	constexpr int CLEAN_BUTTON	 = A3;
+	constexpr int RUN_BUTTON	 = A5;
+	constexpr int CLEAN_BUTTON	 = 13;
 	constexpr int SD			 = 10;
+	constexpr int DOUT			 = A3;
+	constexpr int SCLK			 = 0;
+	constexpr int PDWN			 = 1;
+	constexpr int PIXEL		  	 = A4;
 }  // namespace HardwarePins
-
-// flush pin is the same
 
 namespace DefaultTimes {
 	const int FLUSH_TIME  = 50;
 	const int SAMPLE_TIME = 60;
-	const int PURGE_TIME  = 0;
-	const int IDLE_TIME	  = 3600 - FLUSH_TIME - SAMPLE_TIME - PURGE_TIME;
+	const int IDLE_TIME	  = 3600 - FLUSH_TIME - SAMPLE_TIME;
 	const int SETUP_TIME  = 0;
 }  // namespace DefaultTimes
 
@@ -36,7 +37,6 @@ namespace TPICDevices {
 	constexpr int INTAKE_NEG  = 1;
 	constexpr int FLUSH_VALVE = 3;
 	constexpr int WATER_VALVE = 2;
-	constexpr int PIXEL		  = A4;
 }  // namespace TPICDevices
 
 namespace DefaultPressures {

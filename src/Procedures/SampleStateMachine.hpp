@@ -11,9 +11,7 @@ public:
 
 	void setup() override {
 		registerState(SampleStateIdle(), SampleStateNames::IDLE);
-		registerState(SampleStateStop(), SampleStateNames::STOP, SampleStateNames::LOG_BUFFER);
-		registerState(SampleStateLogBuffer(), SampleStateNames::LOG_BUFFER, SampleStateNames::IDLE);
-			registerState(SampleStateFinished(), SampleStateNames::FINISHED);
+		registerState(SampleStateFinished(), SampleStateNames::FINISHED);
 
 		registerState(SampleStateSetup(),
 			SampleStateNames::SETUP,
@@ -30,12 +28,22 @@ public:
 
 		registerState(SampleStateOnramp(), SampleStateNames::ONRAMP, SampleStateNames::FLUSH);
 		registerState(SampleStateFlush(), SampleStateNames::FLUSH, SampleStateNames::BETWEEN_PUMP);
+
 		registerState(SampleStateBetweenPump(),
 			SampleStateNames::BETWEEN_PUMP,
+			SampleStateNames::LOAD_BUFFER);
+
+		registerState(SampleStateLoadBuffer(),
+			SampleStateNames::LOAD_BUFFER,
 			SampleStateNames::BETWEEN_VALVE);
+
 		registerState(SampleStateBetweenValve(),
 			SampleStateNames::BETWEEN_VALVE,
 			SampleStateNames::SAMPLE);
+
 		registerState(SampleStateSample(), SampleStateNames::SAMPLE, SampleStateNames::STOP);
+
+		registerState(SampleStateStop(), SampleStateNames::STOP, SampleStateNames::LOG_BUFFER);
+		registerState(SampleStateLogBuffer(), SampleStateNames::LOG_BUFFER, SampleStateNames::IDLE);
 	}
 };

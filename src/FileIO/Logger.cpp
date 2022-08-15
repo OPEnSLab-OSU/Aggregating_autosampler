@@ -3,7 +3,7 @@
 #include <time.h>
 #include <sstream>
 
-// Write out to log.csv the time, currentStateName, and pressure.
+// Write out to debug.csv the time, currentStateName, and pressure.
 void Logger::log() {
 	// Only every buffer_time millis
 	if (millis() - last_time > buffer_time) {
@@ -11,13 +11,18 @@ void Logger::log() {
 		Serial.print("Writing...");
 #endif
 		Application & app  = *static_cast<Application *>(controller);
-		const auto timenow = app.power.getTime();
+		const auto timenow = app.clock.getTime();
 		std::stringstream ss;
 		ss << timenow;
 		std::string time_string = ss.str();
 
-		std::string strings[3] = {time_string, app.sm.getCurrentStateName(), "0"};
-		writer.writeStrings(strings, 3);
+		const auto pressnow = app.pressure_sensor.getPressure();
+		std::stringstream ps;
+		ps << pressnow;
+		std::string current_pressure = ps.str();
+
+		std::string strings[5] = {time_string," ", app.sm.getCurrentStateName(),", ", current_pressure};
+		writer.writeStrings(strings, 5);
 		last_time = millis();
 	}
 }

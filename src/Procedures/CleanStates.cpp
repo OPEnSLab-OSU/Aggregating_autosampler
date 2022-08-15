@@ -20,13 +20,20 @@ void CleanStateStop::enter(KPStateMachine & sm) {
 	sm.transitionTo(CleanStateNames::IDLE);
 }
 
+// Valve on
+void CleanStateSetup::enter(KPStateMachine & sm) {
+	Application & app = *static_cast<Application *>(sm.controller);
+	app.shift.setAllRegistersLow();
+	app.shift.setPin(TPICDevices::FLUSH_VALVE, HIGH);  // write in skinny
+	app.shift.write();								   // write shifts wide*/
+
+	setTimeCondition(time, [&]() { 	sm.transitionTo(CleanStateNames::FLUSH); });
+}
+
 // Flush
 void CleanStateFlush::enter(KPStateMachine & sm) {
 	Application & app = *static_cast<Application *>(sm.controller);
 
-	app.shift.setAllRegistersLow();
-	app.shift.setPin(TPICDevices::FLUSH_VALVE, HIGH);  // write in skinny
-	app.shift.write();								   // write shifts wide
 	app.pump.on();
 	app.led.setClean();
 

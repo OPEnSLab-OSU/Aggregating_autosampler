@@ -8,10 +8,9 @@ void setup() {
 	app.setup();
 
 	// Watchdog timer
-
-#ifdef WATCHDOG
-	Watchdog.enable(4000);
-#endif
+	#ifdef WATCHDOG
+		Watchdog.enable(12000);
+	#endif
 }
 
 void loop() {

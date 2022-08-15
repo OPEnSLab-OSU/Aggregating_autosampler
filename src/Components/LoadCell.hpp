@@ -1,61 +1,108 @@
 #pragma once
 #include <KPFoundation.hpp>
-#include <Adafruit_ADS1015.h>
-#ifdef MEDIAN
-#include <array>
-#include <algorithm>
-#include <iterator>
-#endif
-#define AVG 41
+#include <ADS1232.h>
+//#include <FileIO/SerialSD.hpp>
+#include <time.h>
+#include <Application/Constants.hpp>
+#include <FileIO/CSVWriter.hpp>
+#include <String>
+#include <sstream>
+
+#define _dout HardwarePins::DOUT
+#define _sclk HardwarePins::SCLK
+#define _pdwn HardwarePins::PDWN
 
 class LoadCell : public KPComponent {
 public:
-	Adafruit_ADS1115 ads;
-	int32_t tare;
+	CSVWriter csvw{"data.csv"};
+	ADS1232 weight = ADS1232(_pdwn, _sclk, _dout);
+	float tare;
+	float factor = 0.002348;//0.002324227;
 
-	float factor = 0.0832;
-	float offset = 279.56;
+	float offset = -19857.150;//-19691.0843;
+	long reading = 0;
+	long sum;
+	short count;
+
 	LoadCell(const char * name, KPController * controller)
-		: KPComponent(name, controller), ads(0x48) {}
+		: KPComponent(name, controller) {}
 	void setup() override {
-		ads.setGain(GAIN_ONE);
-		ads.begin();
+		weight.power_up();
+		// reset library values to default
+  		weight.OFFSET = 0;
+  		weight.SCALE = 1.0;
 		tare = 0;
-		reTare();
+
+		print("Initial load;");
+		println(reTare(50));
 	}
-	float read() {
-		#ifdef MEDIAN
-		std::array<float, AVG> load_arr;
-		for (int i = 0; i < AVG; ++i) {
-			load_arr.at(i) = (float)ads.readADC_SingleEnded(0);
-		}
-		std::sort(load_arr.begin(), load_arr.end());
-		return load_arr.at(load_arr.size() / 2);
-		#endif
-		#ifndef MEDIAN
-		float sum = 0;
-		for (int i = 0; i < AVG; ++i)
-		{
-			sum += (float) ads.readADC_SingleEnded(0);
-		}
-		return sum / AVG;
-		#endif
-	}
-	float getLoad() {
-		return read() * factor - offset;
-	}
-	void reTare() {
-		tare = getLoad();
-	}
-	int getTaredLoad() {
-		return getLoad() - tare;
+	long read(int qty) {
+		//println("in read");
+
+		println();
+		sum = 0;
+		count = 0;
+		//display every reading
+		for (int i = 0; i < qty; ++i) {
+			reading = weight.raw_read(1);
+			#ifdef LOAD_CAL
+				print("Load reading;");
+				print(i);
+				print(";");
+				println(reading);
+			#endif
+				if (qty>4){
+					//don't include first 5 readings in average due to unreliability
+					if (i>3){
+						sum += reading;
+						count ++;
+						//print("tally of readings to average: ");
+						//println(count);
+					}
+				}
+				//if there aren't more than 5 readings, just use all of them
+				else {
+					sum += reading;
+					count ++;
+				}
+			}
+			reading = sum/(count);
+
+		return reading;
 	}
 
-	int getVoltage() {
-		return ads.readADC_SingleEnded(0);
+	float getLoad(int qty) {
+		// gets factor and offset from this file during setup, gets factor and offset from SD after
+		//println("in getLoad");
+		return factor * read(qty) + offset;
+	}
+
+	float getLoadPrint(int qty) {
+		float load = getLoad(qty);
+		char load_string[50];
+		sprintf(load_string, "%d.%02u", (int)load, (int)((load - (int)load) * 100));
+		std::string strings[2] = {"FLAGGED LOAD, ", load_string};
+		csvw.writeStrings(strings, 2);
+		println("FLAGGED LOAD;", load_string);
+		return load;
+	}
+
+	float reTare(int qty) {
+		//println("in reTare");
+		tare = getLoad(qty);
+		return tare;
+	}
+
+	float getTaredLoad(int qty) {
+		return getLoad(qty) - tare;
+	}
+
+	long getVoltage() {
+		return weight.raw_read(1);
 	}
 
 	float readGrams() {
-		return ((float)ads.readADC_SingleEnded(0)) * factor - offset;
+		//println("in readGrams");
+		return factor * (long)weight.raw_read(1) + offset;
 	}
 };

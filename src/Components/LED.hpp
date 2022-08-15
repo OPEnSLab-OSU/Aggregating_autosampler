@@ -31,7 +31,7 @@ public:
 	std::array<Light *, 3> lights_active = {nullptr, nullptr, nullptr};
 	std::map<const char *, Light> lights;
 	LED(const char * name, KPController * controller)
-		: KPComponent(name, controller), pixel(1, TPICDevices::PIXEL, NEO_RGB + NEO_KHZ800) {}
+		: KPComponent(name, controller), pixel(1, HardwarePins::PIXEL, NEO_RGB + NEO_KHZ800) {}
 	void setup() {
 		pixel.begin();
 		setIdle();

@@ -5,7 +5,9 @@
 #include <SD.h>
 #include <ArduinoJson.h>
 #include <time.h>
-#include <FileIO/SerialSD.hpp>
+#include <sstream>
+#include <String>
+//#include <FileIO/SerialSD.hpp>
 #define cmnd_lambda [](Application & app, const std::string * args)
 #define CALL		(app, args)
 
@@ -77,7 +79,7 @@ void Shell::setup() {
 		"clean_button_press",
 		0,
 		cmnd_lambda { app.csm.begin(); });
-
+	
 	// halt the machine in the sample state
 	addFunction(
 		"sample_halt",
@@ -120,21 +122,27 @@ void Shell::setup() {
 		cmnd_lambda {
 			Serial.println(app.sm.getState<SampleStateFlush>(SampleStateNames::FLUSH).time);
 		});
-
+	
+	//Set time in Unix Epoch time - number of seconds since 1/1/1970 e.g. https://www.epochconverter.com/
 	addFunction(
 		"set_time",
 		1,
 		cmnd_lambda {
 			if (Utility::msg_posint(args[1].c_str(), 1)) {
-				app.power.set(std::stoi(args[1]));
+				app.clock.set(std::stoi(args[1]));
 			}
 		});
+	
+	//unix epoch time - seconds since January 1, 1970
 	addFunction(
 		"get_time",
 		0,
 		cmnd_lambda {
-			std::string time = std::to_string(app.power.getTime());
-			Serial.println(time.c_str());
+			const auto timenow = now();
+			char time_string[50];
+			sprintf(time_string, "%u", timenow);
+			Serial.println(time_string);
+
 		});
 
 	addFunction(
@@ -144,13 +152,13 @@ void Shell::setup() {
 
 	addFunction(
 		"get_load",
-		0,
-		cmnd_lambda { Serial.println(app.load_cell.getLoad()); });
+		1,
+		cmnd_lambda { Serial.println(app.load_cell.getLoad(stoi(args[1]))); });
 
 	addFunction(
 		"get_tared_load",
-		0,
-		cmnd_lambda { Serial.println(app.load_cell.getTaredLoad()); });
+		1,
+		cmnd_lambda { Serial.println(app.load_cell.getTaredLoad(stoi(args[1]))); });
 
 	addFunction(
 		"volt_load",
@@ -186,12 +194,12 @@ void Shell::setup() {
 		});
 
 	addFunction(
-		"sample_sample_volume",
+		"sample_sample_mass",
 		1,
 		cmnd_lambda {
-			const char * loc[2] = {"sample", "sample_volume"};
+			const char * loc[2] = {"sample", "sample_mass"};
 			app.reWrite(loc,
-				app.sm.getState<SampleStateSample>(SampleStateNames::SAMPLE).volume,
+				app.sm.getState<SampleStateSample>(SampleStateNames::SAMPLE).mass,
 				std::stoi(args[1]));
 		});
 
@@ -311,7 +319,7 @@ void Shell::setup() {
 		});
 
 	addFunction(
-		"temp_read",
+		"get_temperature",
 		0,
 		cmnd_lambda { Serial.println(app.pressure_sensor.getTemp()); });
 
@@ -361,16 +369,16 @@ void Shell::setup() {
 
 	addFunction(
 		"load_cell_offset_auto",
-		0,
+		1,
 		cmnd_lambda {
 			const char * loc[2] = {"load_cell", "offset"};
-			app.reWrite(loc, app.load_cell.offset, app.load_cell.getLoad());
+			app.reWrite(loc, app.load_cell.offset, app.load_cell.getLoad(stoi(args[1])));
 		});
 
 	addFunction(
 		"tare_load",
-		0,
-		cmnd_lambda { app.load_cell.reTare(); });
+		1,
+		cmnd_lambda { app.load_cell.reTare(stoi(args[1])); });
 
 	addFunction(
 		"file_reset",
@@ -389,11 +397,6 @@ void Shell::setup() {
 			}
 		});
 
-	/*
-		addFunction(
-			"write_float_test",
-			1,
-			cmnd_lambda { SSD.println((double)std::stof(args[1])); });*/
 }
 
 void Shell::addFunction(const char * name, const unsigned short n_args, ShellSpace::func function) {
@@ -402,24 +405,3 @@ void Shell::addFunction(const char * name, const unsigned short n_args, ShellSpa
 	entry.n_args   = n_args;
 	commands[name] = entry;
 }
-
-/*
-
-struct BadArgs : public std::exception {
-const char * what() const throw() {
-	return "Bad args";
-}
-};
-try {
-	ShellSpace::func_args access = commands.at(args[0]);
-	if (length != access.args) {
-		throw BadArgs();
-	} else {
-		Application & app = *static_cast<Application *>(controller);
-		access.function(app, args);
-	}
-} catch (std::exception & e) {
-	Serial.print("Exception: ");
-	Serial.print(e.what());
-	Serial.print("\n");
-}*/

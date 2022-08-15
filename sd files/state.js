@@ -4,7 +4,8 @@
 		"sample_time" : 60,
 		"idle_time" : 3490,
 		"setup_time" : 0,
-		"last_cycle" : 24
+		"last_cycle" : 24,
+		"sample_mass" : 100
 	},
 	"clean" : {
 		"sample_time" : 5,

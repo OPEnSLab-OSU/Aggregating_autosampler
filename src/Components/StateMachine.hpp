@@ -1,5 +1,4 @@
 #pragma once
-
 #include <KPFoundation.hpp>
 #include <KPStateMachine.hpp>
 #include <KPState.hpp>
@@ -44,10 +43,6 @@ public:
 	const char * getCurrentStateName() {
 		return getCurrentState()->getName();
 	}
-
-	/**
-	 * Return whether the state machine is being run (not finished or nullptr)
-	 */
 
 	bool isBusy() const {
 		return !(getCurrentState() == nullptr

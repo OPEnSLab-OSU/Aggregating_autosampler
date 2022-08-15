@@ -1,7 +1,6 @@
 #pragma once
 #include <MS5803_02.h>
 #include <KPFoundation.hpp>
-#include <Components/ErrorAble.hpp>
 #include <application/Constants.hpp>
 #include <Wire.h>
 #define PRESSURE_ADDR 0x77
@@ -12,15 +11,12 @@ inline bool checkForConnection(unsigned char addr) {
 	return Wire.read() != -1;
 }
 
-class PressureSensor : public KPComponent, public ErrorAble {
+class PressureSensor : public KPComponent {
 public:
 	bool connected;
 	MS_5803 sensor;
 	int min_pressure			  = DefaultPressures::MIN_PRESSURE;
 	int max_pressure			  = DefaultPressures::MAX_PRESSURE;
-	bool kill_clock				  = false;
-	unsigned int kill_time_offset = 5;
-	unsigned int kill_time;
 
 	PressureSensor(const char * name, KPController * controller)
 		: KPComponent(name, controller), sensor(PRESSURE_ADDR) {}
@@ -50,14 +46,29 @@ public:
 	}
 
 	bool isWithinPressure() {
-		float p = getPressure();
-		if (p >= min_pressure && p <= max_pressure) {
+		float sum = 0;
+		int qty = 5;
+		int count = 0;
+		for (int i = 0; i < qty; ++i) {
+			float p_inst = getPressure();
+			#ifdef PRESSURE_CHECK
+				print("Pressure instant mbar;;;;; ");
+				println(p_inst);
+			#endif
+			if (p_inst>0){
+				count = count +1;
+				sum += p_inst;
+			}
+		}
+		float p_avg = sum/count;
+		print("Pressure average mbar;;;;; ");
+		println(p_avg);
+		if (p_avg >= min_pressure && p_avg <= max_pressure) {
 			return true;
 		} else {
 			Serial.print("Not within pressure, value: ");
-			Serial.println(p);
+			Serial.println(p_avg);
 			return false;
 		}
 	}
-	bool checkPressure();
 };
