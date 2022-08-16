@@ -4,19 +4,19 @@
 
 namespace SampleStateNames {
 	constexpr const char * IDLE				= "sample-state-idle";
-	constexpr const char * FLUSH			= "sample-state-flush";
-	constexpr const char * SAMPLE			= "sample-state-sample";
-	constexpr const char * STOP				= "sample-state-stop";
-	constexpr const char * FINISHED			= "sample-state-finished";
 	constexpr const char * SETUP			= "sample-state-setup";
-	constexpr const char * ONRAMP			= "sample-state-onramp";
-	constexpr const char * BETWEEN_PUMP		= "sample-state-between-pump";
-	constexpr const char * BETWEEN_VALVE	= "sample-state-between-valve";
 	constexpr const char * FILL_TUBE_ONRAMP = "sample-state-fill-tube-onramp";
 	constexpr const char * FILL_TUBE		= "sample-state-fill-tube";
 	constexpr const char * PRESSURE_TARE	= "sample-state-pressure-tare";
-	constexpr const char * LOG_BUFFER		= "sample-state-log-buffer";
+	constexpr const char * ONRAMP			= "sample-state-onramp";
+	constexpr const char * FLUSH			= "sample-state-flush";
+	constexpr const char * BETWEEN_PUMP		= "sample-state-between-pump";
 	constexpr const char * LOAD_BUFFER		= "sample-state-load-buffer";
+	constexpr const char * BETWEEN_VALVE	= "sample-state-between-valve";
+	constexpr const char * SAMPLE			= "sample-state-sample";
+	constexpr const char * STOP				= "sample-state-stop";
+	constexpr const char * LOG_BUFFER		= "sample-state-log-buffer";
+	constexpr const char * FINISHED			= "sample-state-finished";
 };	// namespace SampleStateNames
 
 class SampleStateIdle : public KPState {
@@ -25,7 +25,7 @@ public:
 	int time = DefaultTimes::IDLE_TIME;
 };
 
-// Time before first cycle starts
+// Time before first cycle starts: SETUP_TIME
 class SampleStateSetup : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
@@ -34,21 +34,21 @@ public:
 	int tod;
 };
 
-// Flush valve turned on
+// Flush valve turned on; wait for preset time
 class SampleStateFillTubeOnramp : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
 	int time = 7;
 };
 
-// Pump turned on
+// Pump turned on; wait for preset time
 class SampleStateFillTube : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
 	int time = 5;
 };
 
-// This sets the normal pressure range on the first cycle
+// This sets the normal pressure range on the first cycle with measurements over preset time
 class SampleStatePressureTare : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
@@ -60,25 +60,25 @@ public:
 	int range_size = 350;
 };
 
-// Flush valve turned on
+// Flush valve turned on; wait for preset time for valve to open
 class SampleStateOnramp : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
 	int time = 7;
 };
 
-// Pump turned on
+// Pump turned on; wait for FLUSH_TIME
 class SampleStateFlush : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
 	int time = DefaultTimes::FLUSH_TIME;
 };
 
-// Pump turned off
+// Pump turned off; wait for preset time
 class SampleStateBetweenPump : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
-	int time = 6;
+	int time = 5;
 };
 
 // Temperature and load measured
@@ -89,14 +89,14 @@ public:
 	float tempC;
 };
 
-//Flush valve turned off, sample valve turned on
+//Flush valve turned off, sample valve turned on; wait for preset time for valve to open
 class SampleStateBetweenValve : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
 	int time = 7;
 };
 
-// Pump turned on, load and pressure measured until stopping criteria
+// Pump turned on, load and pressure measured until stopping criteria or SAMPLE_TIME
 class SampleStateSample : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
@@ -125,7 +125,7 @@ public:
 class SampleStateStop : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
-	int time = 45;
+	int time = 60;
 };
 
 // Measure final load for cycle

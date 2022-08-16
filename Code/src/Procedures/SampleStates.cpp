@@ -87,7 +87,7 @@ void SampleStateFillTube::enter(KPStateMachine & sm) {
 	setTimeCondition(time, [&]() { sm.next();});
 }
 
-//Pressure tare (enter): Make sure flush valve and pump are on, and wait for preset time (set to make sure tube is full of water)
+//Pressure tare (enter): Make sure flush valve and pump are on, and take pressure measurements for preset time
 void SampleStatePressureTare::enter(KPStateMachine & sm) {
 	Application & app = *static_cast<Application *>(sm.controller);
 	if (flushVOff){
