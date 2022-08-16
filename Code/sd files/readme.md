@@ -12,6 +12,9 @@ uses this formula:
 
 =A1/86400+date(1970,1,1)
 
-The second column is the action performed.
+The second (B) column is the action performed.
 
-Additional columns contain values from the sensors.
+Additional columns contain values from the sensors: 
+C: Load in grams
+D: Temperature in degrees Celsius
+E: Pressure in mbar
