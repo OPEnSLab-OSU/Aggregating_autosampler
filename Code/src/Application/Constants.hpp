@@ -20,6 +20,7 @@ namespace DefaultTimes {
 	const int SAMPLE_TIME = 60;
 	const int IDLE_TIME	  = 3600 - FLUSH_TIME - SAMPLE_TIME;
 	const int SETUP_TIME  = 0;
+	const int FILL_TIME = 20;
 }  // namespace DefaultTimes
 
 namespace DefaultTimesClean {

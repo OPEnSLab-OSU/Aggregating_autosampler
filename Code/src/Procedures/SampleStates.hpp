@@ -45,7 +45,7 @@ public:
 class SampleStateFillTube : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
-	int time = 5;
+	int time = DefaultTimes::FILL_TIME;
 };
 
 // This sets the normal pressure range on the first cycle with measurements over preset time

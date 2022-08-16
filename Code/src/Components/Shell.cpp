@@ -184,6 +184,16 @@ void Shell::setup() {
 		});
 
 	addFunction(
+		"sample_fill_time",
+		1,
+		cmnd_lambda {
+			const char * loc[2] = {"sample", "fill_time"};
+			app.reWrite(loc,
+				app.sm.getState<SampleStateFlush>(SampleStateNames::FILL_TUBE).time,
+				std::stoi(args[1]));
+		});	
+
+	addFunction(
 		"sample_sample_time",
 		1,
 		cmnd_lambda {
