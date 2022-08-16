@@ -13,7 +13,7 @@ unsigned long sample_start_time;
 unsigned long sample_end_time;
 short load_count = 0;
 float prior_load = 0;
-int sampler = 1;
+int sampler = 2;
 
 
 //SerialSD SSD;
