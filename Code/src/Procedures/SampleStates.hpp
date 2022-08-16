@@ -25,12 +25,78 @@ public:
 	int time = DefaultTimes::IDLE_TIME;
 };
 
+// Time before first cycle starts
+class SampleStateSetup : public KPState {
+public:
+	void enter(KPStateMachine & sm) override;
+	int time = DefaultTimes::SETUP_TIME;
+	int tod_enabled;
+	int tod;
+};
+
+// Flush valve turned on
+class SampleStateFillTubeOnramp : public KPState {
+public:
+	void enter(KPStateMachine & sm) override;
+	int time = 7;
+};
+
+// Pump turned on
+class SampleStateFillTube : public KPState {
+public:
+	void enter(KPStateMachine & sm) override;
+	int time = 5;
+};
+
+// This sets the normal pressure range on the first cycle
+class SampleStatePressureTare : public KPState {
+public:
+	void enter(KPStateMachine & sm) override;
+	void update(KPStateMachine & sm) override;
+	void leave(KPStateMachine & sm) override;
+	int time = 5;
+	long sum;
+	int count;
+	int range_size = 350;
+};
+
+// Flush valve turned on
+class SampleStateOnramp : public KPState {
+public:
+	void enter(KPStateMachine & sm) override;
+	int time = 7;
+};
+
+// Pump turned on
 class SampleStateFlush : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
 	int time = DefaultTimes::FLUSH_TIME;
 };
 
+// Pump turned off
+class SampleStateBetweenPump : public KPState {
+public:
+	void enter(KPStateMachine & sm) override;
+	int time = 6;
+};
+
+// Temperature and load measured
+class SampleStateLoadBuffer : public KPState {
+public:
+	void enter(KPStateMachine & sm) override;
+	float current_tare;
+	float tempC;
+};
+
+//Flush valve turned off, sample valve turned on
+class SampleStateBetweenValve : public KPState {
+public:
+	void enter(KPStateMachine & sm) override;
+	int time = 7;
+};
+
+// Pump turned on, load and pressure measured until stopping criteria
 class SampleStateSample : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
@@ -55,67 +121,14 @@ public:
 	float wt_offset;
 };
 
+// Sample valve and pump turned off. Wait preset time to reduce noise in final load measurement
 class SampleStateStop : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
 	int time = 45;
 };
 
-class SampleStateFinished : public KPState {
-public:
-	void enter(KPStateMachine & sm) override;
-};
-
-class SampleStateSetup : public KPState {
-public:
-	void enter(KPStateMachine & sm) override;
-	int time = DefaultTimes::SETUP_TIME;
-	int tod_enabled;
-	int tod;
-};
-
-class SampleStateOnramp : public KPState {
-public:
-	void enter(KPStateMachine & sm) override;
-	int time = 5;
-};
-
-class SampleStateBetweenPump : public KPState {
-public:
-	void enter(KPStateMachine & sm) override;
-	int time = 6;
-};
-
-class SampleStateBetweenValve : public KPState {
-public:
-	void enter(KPStateMachine & sm) override;
-	int time = 7;
-};
-
-class SampleStateFillTubeOnramp : public KPState {
-public:
-	void enter(KPStateMachine & sm) override;
-	int time = 7;
-};
-
-class SampleStateFillTube : public KPState {
-public:
-	void enter(KPStateMachine & sm) override;
-	int time = 5;
-};
-
-// This sets the normal pressure range on the first cycle
-class SampleStatePressureTare : public KPState {
-public:
-	void enter(KPStateMachine & sm) override;
-	void update(KPStateMachine & sm) override;
-	void leave(KPStateMachine & sm) override;
-	int time = 5;
-	long sum;
-	int count;
-	int range_size = 350;
-};
-
+// Measure final load for cycle
 class SampleStateLogBuffer : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
@@ -128,9 +141,13 @@ public:
 	float load_diff;
 };
 
-class SampleStateLoadBuffer : public KPState {
+//Exit sample machine after all cycles complete
+class SampleStateFinished : public KPState {
 public:
 	void enter(KPStateMachine & sm) override;
-	float current_tare;
-	float tempC;
 };
+
+
+
+
+
