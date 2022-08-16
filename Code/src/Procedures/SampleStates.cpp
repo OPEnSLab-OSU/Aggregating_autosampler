@@ -13,6 +13,7 @@ unsigned long sample_start_time;
 unsigned long sample_end_time;
 short load_count = 0;
 float prior_load = 0;
+int sampler = 1;
 
 
 //SerialSD SSD;
@@ -161,12 +162,18 @@ void SampleStateSample::enter(KPStateMachine & sm) {
 		print("New time;;;");
 		println(new_time);
 		// compensate for poor measurements for first 4
-		if(load_count==4){
-			wt_offset = ((new_load - prior_load)/(new_time - prior_time))*(new_time - sample_start_time);
-			print("Weight offset;;;;");
-			println(wt_offset);
+		if (sampler==2){
+			if(load_count==4){
+				wt_offset = ((new_load - prior_load)/(new_time - prior_time))*(new_time - sample_start_time);
+				print("Weight offset;;;;");
+				println(wt_offset);
+			}
 		}
-		
+		// use basic offset for sampler 1
+		else{
+			wt_offset = 0.05*mass;
+		}
+
 		const auto timenow = now();
 		std::stringstream ss;
 		ss << timenow;
