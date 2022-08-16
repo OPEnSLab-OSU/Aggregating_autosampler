@@ -51,14 +51,16 @@ void SampleStateStop::enter(KPStateMachine & sm) {
 	sampleVOff = 1;
 
 	//get and print to SD pressure after pump and valves are off
-	float curr_pressure = app.pressure_sensor.getPressure();
+	long curr_pressure = app.pressure_sensor.getPressure();
+	char press_string[50];
+	sprintf(press_string, "%Lu", (long)curr_pressure);
 	const auto timenow = now();
 	std::stringstream ss;
 	ss << timenow;
 	std::string time_string = ss.str();
 	char cycle_string[50];
 	sprintf(cycle_string, "%u", (int)app.sm.current_cycle);
-	std::string strings[5] = {time_string,",Ending pressure for cycle: ",cycle_string,",,, ", curr_pressure};
+	std::string strings[5] = {time_string,",Ending pressure for cycle: ",cycle_string,",,, ", press_string};
 	csvw.writeStrings(strings, 5);
 
 	setTimeCondition(time, [&]() { sm.next();});
