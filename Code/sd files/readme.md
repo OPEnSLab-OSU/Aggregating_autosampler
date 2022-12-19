@@ -6,7 +6,7 @@ for proper readability.
 Data.csv logs major milestones in the sampling routine.
 
 The first column of data.csv is the time. It is in unformatted Unix Epoch Time, 
-meaning it shows up as a big number reprsenting the number of seconds since 1970.
+meaning it shows up as a big number representing the number of seconds since 1970.
 To convert that big number into a human readable format, make a fourth column that
 uses this formula:
 
